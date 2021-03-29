@@ -1,9 +1,22 @@
 <template>
   <div id="pageContainer">
-    <button @click="currentPagePrev" class="button">Prev</button>
-
-    <span class="textspan"> {{ currentPage }} / {{ pageCount }} </span>
-    <button @click="currentPageNext" class="button">Next</button>
+    <div class="pdfHeader">
+      <div class="pdfHeaderinput">
+        <button @click="currentPagePrev" class="button">
+          <i class="fas fa-arrow-left"></i>
+        </button>
+        <span class="textspan"> {{ currentPage }} / {{ pageCount }} </span>
+        <button @click="currentPageNext" class="button">
+          <i class="fas fa-arrow-right"></i>
+        </button>
+        <button @click="zoomOut" class="button zoom">
+          <i class="fas fa-search-minus"></i>
+        </button>
+        <button @click="zoomIn" class="button zoom">
+          <i class="fas fa-search-plus"></i>
+        </button>
+      </div>
+    </div>
     <canvas id="the-canvas"></canvas>
   </div>
 </template>
@@ -18,6 +31,7 @@ export default {
     return {
       currentPage: 1,
       pageCount: null,
+      pageScale: 1.5,
     };
   },
   created() {
@@ -28,10 +42,11 @@ export default {
       let currentPageNumber = this.currentPage;
       let loadingTask = pdfjsLib.getDocument("./sample.pdf");
       let pdfto = loadingTask.promise;
+      console.log("ss", currentPageNumber);
       this.pageCount = (await pdfto).numPages;
       loadingTask.promise.then((pdf) => {
         pdf.getPage(currentPageNumber).then((page) => {
-          var scale = 2.5;
+          var scale = this.pageScale;
           var viewport = page.getViewport({ scale: scale });
 
           var canvas = document.getElementById("the-canvas");
@@ -59,6 +74,14 @@ export default {
         this.getPdf();
       }
     },
+    zoomOut() {
+      this.pageScale -= 1;
+      this.getPdf();
+    },
+    zoomIn() {
+      this.pageScale += 1;
+      this.getPdf();
+    },
   },
 };
 </script>
@@ -66,14 +89,39 @@ export default {
 <style>
 #pageContainer {
   margin: auto;
+  width: 918px;
+  height: 1188px;
+  position: relative;
+}
+.pdfHeader {
+  height: 140px;
+  width: 50px;
+  background: rgba(7, 20, 34, 0.4);
+  position: absolute;
+  right: 15px;
+  top: 30%;
+}
+.pdfHeaderinput {
+  display: flex;
+  flex-direction: column;
+  padding-top: 15px;
+}
+.pdfHeaderinput > * {
+  margin-top: 5px;
 }
 .button {
   color: blue;
   background: white;
   cursor: pointer;
+  width: 50px;
+  height: 20px;
 }
 .textspan {
   color: red;
+}
+.zoom {
+  font-size: 16px;
+  background: transparent;
 }
 div.page {
   display: inline-block;
